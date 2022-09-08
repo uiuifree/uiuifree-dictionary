@@ -3,8 +3,9 @@ mod resource;
 use mecab::Tagger;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
-use crate::resource::{DictionaryLocation, MecabCost, MecabLocation, DictionaryPlace};
+use crate::resource::{MecabCost, MecabLocation, DictionaryPlace};
 pub use resource::*;
+pub use crate::resource::{DictionaryLocation};
 
 pub struct Dictionary {}
 

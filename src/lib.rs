@@ -7,6 +7,7 @@ use crate::resource::{DictionaryLocation, MecabCost, MecabLocation, DictionaryPl
 pub use resource::*;
 
 pub struct Dictionary {}
+
 impl Dictionary {
     pub fn parse_from_dic<T>(dic: &str, value: &str) -> Vec<DictionaryValue<T>>
         where T: DeserializeOwned
@@ -32,11 +33,21 @@ impl Dictionary {
                 mecab_locations.push(station);
             }
         }
-        let mut place = DictionaryPlace::new();
+
+
+        let mut dic_place = DictionaryPlace::new();
         for v in mecab_locations {
-            place.append_predictive_location(v);
+            dic_place.append_predictive_location(v);
         }
-        place
+
+        let predicts = Dictionary::str_to_predict_location(place);
+
+        for v in predicts {
+            dic_place.append_low_predictive_location(v);
+        }
+
+
+        dic_place
     }
 
     pub fn str_to_location(value: &str) -> Vec<MecabLocation> {
@@ -50,6 +61,11 @@ impl Dictionary {
         if primary.len() > 0 {
             return primary;
         }
+        return locations;
+    }
+    pub fn str_to_predict_location(value: &str) -> Vec<MecabLocation> {
+        let locations = value_to_json3(format!("-u {}dic_area_predict.dic", dic_root()).as_str(), value);
+
         return locations;
     }
     pub fn str_to_station(
@@ -86,6 +102,7 @@ fn dic_root() -> String {
     }
 }
 
+
 fn value_to_json(dic: &str, value: &str) -> Vec<MecabLocation> {
     let mut tagger = Tagger::new(dic);
     let mut node = tagger.parse_to_node(value);
@@ -100,6 +117,33 @@ fn value_to_json(dic: &str, value: &str) -> Vec<MecabLocation> {
                         location: json.unwrap(),
                         cost: MecabCost::new(n.wcost as i32),
                     })
+                }
+                node = n;
+            }
+            None => break,
+        }
+    }
+    return rows;
+}
+
+
+fn value_to_json3(dic: &str, value: &str) -> Vec<MecabLocation> {
+    let mut tagger = Tagger::new(dic);
+    let mut node = tagger.parse_to_node(value);
+    let mut rows = vec![];
+
+    loop {
+        match node.next() {
+            Some(n) => {
+                let json = serde_json::from_str::<Vec<DictionaryLocation>>(n.feature.as_str());
+                if json.is_ok() {
+                    let json = json.unwrap();
+                    for value in json {
+                        rows.push(MecabLocation {
+                            cost: MecabCost::default(),
+                            location: value,
+                        });
+                    }
                 }
                 node = n;
             }

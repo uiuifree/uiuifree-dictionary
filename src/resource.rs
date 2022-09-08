@@ -24,12 +24,12 @@ impl PartialEq for DictionaryLocation {
             && self.street_address == other.street_address
     }
 }
+
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct DictionaryValue<T> {
     pub word: String,
     pub value: T,
 }
-
 
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
@@ -64,6 +64,8 @@ pub struct DictionaryPlace {
     fixed_locations: Vec<DictionaryLocation>,
     // 予測値
     predictive_locations: Vec<MecabLocation>,
+    // 予測値
+    low_predictive_locations: Vec<MecabLocation>,
 }
 
 impl DictionaryPlace {
@@ -71,11 +73,29 @@ impl DictionaryPlace {
         DictionaryPlace {
             fixed_locations: vec![],
             predictive_locations: vec![],
+            low_predictive_locations: vec![],
         }
     }
     pub fn append_predictive_location(&mut self, location: MecabLocation) {
         self.predictive_locations.push(location);
     }
+    pub fn append_low_predictive_location(&mut self, location: MecabLocation) {
+        self.low_predictive_locations.push(location);
+    }
+    pub fn fuzzy_location(&mut self) ->Vec<(i32,DictionaryLocation)>{
+        let mut response = vec![];
+        for location in &self.predictive_locations {
+            response.push((location.cost.cost, location.location.clone()));
+        }
+        if response.is_empty(){
+
+        for location in &self.low_predictive_locations {
+            response.push((location.cost.cost, location.location.clone()));
+        }
+        }
+        response
+    }
+
     pub fn fix_location(&mut self) -> Vec<DictionaryLocation> {
         // 決まってるロケーション
         let mut fix_prefectures = vec![];

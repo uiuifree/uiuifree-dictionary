@@ -1,13 +1,17 @@
 mod resource;
-
+#[cfg(feature = "dic-mecab")]
 use mecab::Tagger;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
+
 use crate::resource::{MecabCost, MecabLocation, DictionaryPlace};
 pub use resource::*;
 pub use crate::resource::{DictionaryLocation};
 
+#[cfg(feature = "dic-mecab")]
+
 pub struct Dictionary {}
+#[cfg(feature = "dic-mecab")]
 
 impl Dictionary {
     pub fn parse_from_dic<T>(dic: &str, value: &str) -> Vec<DictionaryValue<T>>
@@ -103,6 +107,7 @@ fn dic_root() -> String {
     }
 }
 
+#[cfg(feature = "dic-mecab")]
 
 fn value_to_json(dic: &str, value: &str) -> Vec<MecabLocation> {
     let mut tagger = Tagger::new(dic);
@@ -127,6 +132,7 @@ fn value_to_json(dic: &str, value: &str) -> Vec<MecabLocation> {
     return rows;
 }
 
+#[cfg(feature = "dic-mecab")]
 
 fn value_to_json3(dic: &str, value: &str) -> Vec<MecabLocation> {
     let mut tagger = Tagger::new(dic);
@@ -154,6 +160,7 @@ fn value_to_json3(dic: &str, value: &str) -> Vec<MecabLocation> {
     return rows;
 }
 
+#[cfg(feature = "dic-mecab")]
 
 fn word_to_kconfig<T>(dic: &str, value: &str) -> Vec<DictionaryValue<T>>
     where T: DeserializeOwned
@@ -177,6 +184,7 @@ fn word_to_kconfig<T>(dic: &str, value: &str) -> Vec<DictionaryValue<T>>
     }
     response
 }
+#[cfg(feature = "dic-mecab")]
 
 fn value_to_json2(dic: &str, value: &str) -> Vec<MecabNode> {
     let tagger = Tagger::new(format!("-u {}", dic));
